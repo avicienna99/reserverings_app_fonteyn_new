@@ -56,7 +56,7 @@ jobs:
             --password ${{ secrets.AZURE_CLIENT_SECRET }} \
             --tenant ${{ secrets.AZURE_TENANT_ID }}
           az containerapp update \
-            --name applicationres \
+            --name example-app \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --image ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest \
             --set-env-vars IMAGE_PULL_POLICY=Always
