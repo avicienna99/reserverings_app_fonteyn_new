@@ -10,41 +10,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.23'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
 
-    - name: Install dependencies
-      run: |
-        go mod tidy
+      - name: Install dependencies
+        run: |
+          go mod tidy
 
-    - name: Run tests
-      run: |
-        go test ./... -v
+      - name: Run tests
+        run: |
+          go test ./... -v
 
   deploy:
     runs-on: ubuntu-latest
     needs: [build-and-test]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Login to Azure Container Registry
-      uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.ACR_LOGIN_SERVER }}
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-    - name: Build Docker image
-      run: |
-        docker build --no-cache -t ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest .
+      - name: Build Docker image
+        run: |
+          docker build --no-cache -t ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest .
 
-    - name: Push Docker image to ACR
-      run: |
-        docker push ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest
+      - name: Push Docker image to ACR
+        run: |
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest
+
+      - name: Login to Azure CLI
+        run: |
+          az login --service-principal \
+            --username ${{ secrets.AZURE_CLIENT_ID }} \
+            --password ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Deploy to Azure Container App
+        run: |
+          az containerapp update \
+            --name example-app \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --image ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest
