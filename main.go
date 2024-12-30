@@ -44,7 +44,7 @@ func init() {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request received: %s %s", r.Method, r.URL.Path)
-	fmt.Fprintln(w, "Website DB test 1 2 3")
+	fmt.Fprintln(w, "Website DB test bhhb")
 }
 
 func main() {
