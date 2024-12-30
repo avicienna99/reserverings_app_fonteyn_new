@@ -59,6 +59,6 @@ jobs:
       - name: Deploy to Azure Container App
         run: |
           az containerapp update \
-            --name applicationres \
+            --name example-app \
             --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
             --image ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest
