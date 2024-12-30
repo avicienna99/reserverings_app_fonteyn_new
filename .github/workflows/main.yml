@@ -43,8 +43,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build --no-cache -t ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest .
+          docker build --no-cache -t ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:v2.0 .
 
       - name: Push Docker image to ACR
         run: |
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:v2.0
