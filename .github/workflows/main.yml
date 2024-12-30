@@ -49,6 +49,13 @@ jobs:
         run: |
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest
 
+      - name: Verify ACA configuration before update
+        run: |
+          az containerapp show \
+            --name example-app \
+            --resource-group RG-ReservationSystemApplication \
+            --output json
+
       - name: Deploy to Azure Container App
         run: |
           az login --service-principal \
@@ -57,6 +64,13 @@ jobs:
             --tenant ${{ secrets.AZURE_TENANT_ID }}
           az containerapp update \
             --name example-app \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --resource-group RG-ReservationSystemApplication \
             --image ${{ secrets.ACR_LOGIN_SERVER }}/applicationres:latest \
             --set-env-vars IMAGE_PULL_POLICY=Always
+
+      - name: Verify ACA configuration after update
+        run: |
+          az containerapp show \
+            --name example-app \
+            --resource-group RG-ReservationSystemApplication \
+            --output json
