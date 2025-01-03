@@ -24,14 +24,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .house h2 {
-            margin: 0 0 10px;
-            color: #333;
-        }
-        .house p {
-            margin: 5px 0;
-            color: #666;
+            cursor: pointer;
         }
         .popup {
             display: none; /* Hidden by default */
@@ -44,6 +37,9 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+        }
+        .popup.visible {
+            display: flex;
         }
         .popup-content {
             background: white;
@@ -60,51 +56,53 @@
             flex-direction: column;
             gap: 10px;
         }
-        #close-popup {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 20px;
-            font-weight: bold;
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .overlay.visible {
+            display: block;
         }
     </style>
-    <script defer src="/static/script.js"></script>
 </head>
 <body>
     <h1>Houses for Rent</h1>
-    <div class="house-list">
+    <div class="house-list" id="houses">
         {{range .Houses}}
-        <div class="house">
+        <div class="house" data-id="{{.ID}}">
             <h2>{{.Name}}</h2>
             <p>{{.Description}}</p>
             <p><strong>Price:</strong> ${{.Price}}</p>
-            <button data-house-id="{{.ID}}">Reserve</button>
         </div>
         {{end}}
     </div>
 
+    <div id="overlay" class="overlay"></div>
+
     <!-- Reservation Popup -->
-    <div id="reservation-popup" class="popup">
+    <div id="popup" class="popup">
         <div class="popup-content">
             <span id="close-popup">&times;</span>
             <h2>Reserve a House</h2>
             <form id="reservation-form">
                 <label for="name">Name:</label>
-                <input type="text" id="name" required>
-
+                <input type="text" id="name" name="name" required>
                 <label for="email">Email:</label>
-                <input type="email" id="email" required>
-
+                <input type="email" id="email" name="email" required>
                 <label for="start-date">Start Date:</label>
-                <input type="date" id="start-date" required>
-
+                <input type="date" id="start-date" name="start-date" required>
                 <label for="end-date">End Date:</label>
-                <input type="date" id="end-date" required>
-
-                <button type="submit">Submit Reservation</button>
+                <input type="date" id="end-date" name="end-date" required>
+                <button type="submit">Submit</button>
             </form>
         </div>
     </div>
+    <script src="/static/script.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
@@ -12,25 +13,27 @@ type PageData struct {
 	Houses []db.House
 }
 
-// handler serves the main HTML page with a list of houses
-func handler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Request received: %s %s", r.Method, r.URL.Path)
+type Reservation struct {
+	HouseID   int    `json:"house_id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
+}
 
-	// Fetch houses from the database
+func handler(w http.ResponseWriter, r *http.Request) {
 	houses, err := db.GetHouses()
 	if err != nil {
 		http.Error(w, "Error fetching house data", http.StatusInternalServerError)
 		return
 	}
 
-	// Parse the HTML template
 	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
 
-	// Render the template with house data
 	data := PageData{Houses: houses}
 	err = tmpl.Execute(w, data)
 	if err != nil {
@@ -38,9 +41,37 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Start initializes and starts the HTTP server
+func reserveHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var res Reservation
+	err := json.NewDecoder(r.Body).Decode(&res)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	err = db.AddReservation(db.Reservation{
+		HouseID:   res.HouseID,
+		Name:      res.Name,
+		Email:     res.Email,
+		StartDate: res.StartDate,
+		EndDate:   res.EndDate,
+	})
+	if err != nil {
+		http.Error(w, "Failed to create reservation", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func Start() {
 	http.HandleFunc("/", handler)
+	http.HandleFunc("/reserve", reserveHandler)
 
 	log.Println("Starting server on http://localhost:8080")
 	err := http.ListenAndServe(":80", nil)

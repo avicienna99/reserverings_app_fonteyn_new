@@ -19,24 +19,13 @@ type House struct {
 	Price       float64
 }
 
-// GetHouses retrieves all houses from the database
-func GetHouses() ([]House, error) {
-	rows, err := DB.Query("SELECT id, name, description, price FROM houses")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var houses []House
-	for rows.Next() {
-		var house House
-		if err := rows.Scan(&house.ID, &house.Name, &house.Description, &house.Price); err != nil {
-			log.Printf("Error scanning row: %v", err)
-			continue
-		}
-		houses = append(houses, house)
-	}
-	return houses, nil
+type Reservation struct {
+	ID        int
+	HouseID   int
+	Name      string
+	Email     string
+	StartDate string
+	EndDate   string
 }
 
 func Init() {
@@ -58,7 +47,6 @@ func Init() {
 		log.Fatalf("Error opening database: %v", err)
 	}
 
-	// Test the database connection
 	err = DB.Ping()
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
@@ -74,4 +62,31 @@ func Close() {
 			log.Printf("Error closing database connection: %v", err)
 		}
 	}
+}
+
+func GetHouses() ([]House, error) {
+	rows, err := DB.Query("SELECT id, name, description, price FROM houses")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var houses []House
+	for rows.Next() {
+		var house House
+		if err := rows.Scan(&house.ID, &house.Name, &house.Description, &house.Price); err != nil {
+			log.Printf("Error scanning row: %v", err)
+			continue
+		}
+		houses = append(houses, house)
+	}
+	return houses, nil
+}
+
+func AddReservation(res Reservation) error {
+	_, err := DB.Exec(
+		"INSERT INTO reservations (house_id, name, email, start_date, end_date) VALUES (?, ?, ?, ?, ?)",
+		res.HouseID, res.Name, res.Email, res.StartDate, res.EndDate,
+	)
+	return err
 }
