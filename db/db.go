@@ -12,6 +12,33 @@ import (
 
 var DB *sql.DB
 
+type House struct {
+	ID          int
+	Name        string
+	Description string
+	Price       float64
+}
+
+// GetHouses retrieves all houses from the database
+func GetHouses() ([]House, error) {
+	rows, err := DB.Query("SELECT id, name, description, price FROM houses")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var houses []House
+	for rows.Next() {
+		var house House
+		if err := rows.Scan(&house.ID, &house.Name, &house.Description, &house.Price); err != nil {
+			log.Printf("Error scanning row: %v", err)
+			continue
+		}
+		houses = append(houses, house)
+	}
+	return houses, nil
+}
+
 func Init() {
 	err := godotenv.Load()
 	if err != nil {

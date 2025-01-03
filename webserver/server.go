@@ -1,48 +1,49 @@
 package server
 
 import (
+	"html/template"
 	"log"
 	"net/http"
-	"os"
+
+	"github.com/avicienna99/reserverings_app_fonteyn_new/db"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Request received: %s %s", r.Method, r.URL.Path)
-	w.Header().Set("Content-Type", "text/html")
-	htmlContent := `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Welcome to the Server</h1>
-        <p>The server is running successfully.</p>
-    </div>
-</body>
-</html>`
-	w.Write([]byte(htmlContent))
+type PageData struct {
+	Houses []db.House
 }
 
-func Start() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "80"
+// handler serves the main HTML page with a list of houses
+func handler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Request received: %s %s", r.Method, r.URL.Path)
+
+	// Fetch houses from the database
+	houses, err := db.GetHouses()
+	if err != nil {
+		http.Error(w, "Error fetching house data", http.StatusInternalServerError)
+		return
 	}
 
-	// Serve static files
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	// Parse the HTML template
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
+		return
+	}
 
+	// Render the template with house data
+	data := PageData{Houses: houses}
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+	}
+}
+
+// Start initializes and starts the HTTP server
+func Start() {
 	http.HandleFunc("/", handler)
 
-	// Start HTTP server
-	log.Printf("Starting server on port %s...\n", port)
-	err := http.ListenAndServe(":"+port, nil)
+	log.Println("Starting server on http://localhost:8080")
+	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}

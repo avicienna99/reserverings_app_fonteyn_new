@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Houses for Rent</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script defer src="/static/script.js"></script>
+</head>
+<body>
+    <h1>Houses for Rent</h1>
+    <div class="tiles">
+        {{range .Houses}}
+        <div class="tile">
+            <h2>{{.Name}}</h2>
+            <p>{{.Description}}</p>
+            <p><strong>Price:</strong> ${{.Price}}</p>
+            <button data-house-id="{{.ID}}">Reserve</button>
+        </div>
+        {{end}}
+    </div>
+
+    <!-- Reservation Popup -->
+    <div id="reservation-popup" class="popup">
+        <div class="popup-content">
+            <span id="close-popup">&times;</span>
+            <h2>Reserve a House</h2>
+            <form id="reservation-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+
+                <label for="start-date">Start Date:</label>
+                <input type="date" id="start-date" required>
+
+                <label for="end-date">End Date:</label>
+                <input type="date" id="end-date" required>
+
+                <button type="submit">Submit Reservation</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
