@@ -70,6 +70,10 @@ func reserveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func Start() {
+	// Serve static files from the "static" directory
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
+	// Application-specific routes
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/reserve", reserveHandler)
 

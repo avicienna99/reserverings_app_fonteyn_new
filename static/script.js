@@ -1,17 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
     const popup = document.getElementById("popup");
     const overlay = document.getElementById("overlay");
-    const closePopup = document.getElementById("close-popup");
+    const closePopupButton = document.getElementById("close-popup"); // Renamed to avoid conflict
     const reservationForm = document.getElementById("reservation-form");
 
+    // Log DOM elements to confirm they're loaded
+    console.log("Popup element:", popup);
+    console.log("Overlay element:", overlay);
+    console.log("Reservation Form:", reservationForm);
+
     // Load house tiles
-    document.querySelectorAll(".house").forEach(house => {
+    const houses = document.querySelectorAll(".house");
+    console.log("Found house elements:", houses);
+
+    houses.forEach(house => {
+        console.log("Attaching event listener to house:", house);
         house.addEventListener("click", () => {
+            console.log(`House clicked: ID = ${house.dataset.id}`);
             openPopup(house.dataset.id);
         });
     });
 
     function openPopup(houseId) {
+        console.log(`Opening popup for house ID: ${houseId}`);
         popup.classList.add("visible");
         overlay.classList.add("visible");
         reservationForm.dataset.houseId = houseId;
@@ -24,11 +35,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function closePopup() {
+        console.log("Closing popup");
         popup.classList.remove("visible");
         overlay.classList.remove("visible");
     }
 
-    closePopup.addEventListener("click", closePopup);
+    closePopupButton.addEventListener("click", closePopup); // Updated usage
     overlay.addEventListener("click", closePopup);
 
     reservationForm.addEventListener("submit", async (e) => {
@@ -46,6 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
             start_date: startDate,
             end_date: endDate,
         };
+
+        console.log("Submitting reservation:", reservation);
 
         try {
             const response = await fetch('/reserve', {
